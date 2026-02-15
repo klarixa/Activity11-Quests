@@ -3,6 +3,7 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const path = require('path');
 
 // ADVANCED CONCEPT: API Security Layers
 // Each middleware serves a specific security purpose
@@ -138,26 +139,9 @@ app.use('/api/quests', require('./routes/quests'));
 app.use('/api/players', require('./routes/players'));
 app.use('/api/categories', require('./routes/categories'));
 
-// Root endpoint
+// Root endpoint: Serve the UI
 app.get('/', (req, res) => {
-  res.json({
-    message: '🏆 Quest Tracker API v1.0',
-    documentation: '/api/docs',
-    health_check: '/health',
-    api_status: '/api/status',
-    endpoints: {
-      quests: '/api/quests',
-      players: '/api/players/:username',
-      categories: '/api/categories'
-    },
-    authentication: {
-      demo_key: 'demo_key_12345',
-      usage: 'Include X-API-Key header or api_key query parameter'
-    },
-    version: '1.0.0',
-    status: 'active',
-    server_time: new Date().toISOString()
-  });
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // API documentation endpoint
