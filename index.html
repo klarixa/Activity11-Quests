@@ -1238,7 +1238,7 @@
     </div>
 
     <script>
-        const baseUrl = 'http://localhost:3000';
+        const baseUrl = window.location.origin;
         let requestStats = {
             total: 0,
             successful: 0,
@@ -1532,7 +1532,7 @@
 
                     // Then make API call to delete from backend
                     try {
-                        const response = await fetch(`http://localhost:3000/api/quests/${questId}?api_key=${apiKey}`, {
+                        const response = await fetch(`${baseUrl}/api/quests/${questId}?api_key=${apiKey}`, {
                             method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -1575,7 +1575,7 @@
                 }
 
                 // Make API call in background
-                const response = await fetch(`http://localhost:3000/api/quests/${questId}/complete?api_key=${apiKey}`, {
+                const response = await fetch(`${baseUrl}/api/quests/${questId}/complete?api_key=${apiKey}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1611,7 +1611,7 @@
         async function viewAllQuests() {
             try {
                 const apiKey = document.getElementById('apiKey').value;
-                const response = await fetch(`http://localhost:3000/api/quests?api_key=${apiKey}&limit=50`, {
+                const response = await fetch(`${baseUrl}/api/quests?api_key=${apiKey}&limit=50`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
