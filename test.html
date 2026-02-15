@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quest Tracker API Tester</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            background: linear-gradient(135deg, #fce4ec 0%, #e8eaf6 25%, #e0f7fa 50%, #f3e5f5 75%, #fff3e0 100%);
+            background-attachment: fixed;
+            color: #4a4458;
+            min-height: 100vh;
+        }
+
+        /* Animated floating orbs in background */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: -1;
+            animation: floatOrb 12s ease-in-out infinite alternate;
+        }
+
+        body::before {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #f8bbd0, #ce93d8);
+            top: -100px;
+            right: -100px;
+        }
+
+        body::after {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #b2dfdb, #81d4fa);
+            bottom: -80px;
+            left: -80px;
+            animation-delay: -6s;
+        }
+
+        @keyframes floatOrb {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate(40px, -40px) scale(1.15);
+            }
+        }
+
+        /* Glassmorphism container */
+        .container {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px rgba(149, 128, 175, 0.12),
+                0 1px 4px rgba(149, 128, 175, 0.06);
+            margin-bottom: 24px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            box-shadow: 0 12px 40px rgba(149, 128, 175, 0.18),
+                0 2px 6px rgba(149, 128, 175, 0.08);
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #ab47bc, #5c6bc0, #26c6da);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 2.6em;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        h2 {
+            color: #5c5478;
+            font-weight: 600;
+            font-size: 1.5em;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(171, 71, 188, 0.15);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #8e8a9e;
+            margin-bottom: 28px;
+            font-size: 1.05em;
+            font-weight: 400;
+        }
+
+        /* Auth section */
+        .auth-section {
+            background: rgba(243, 229, 245, 0.5);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 28px;
+            border-left: 4px solid #ce93d8;
+            border: 1px solid rgba(206, 147, 216, 0.3);
+            border-left: 4px solid #ce93d8;
+        }
+
+        .auth-section h3 {
+            color: #7b1fa2;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .auth-section p {
+            color: #6d5e7a;
+            font-size: 0.92em;
+        }
+
+        /* Endpoint cards */
+        .endpoint {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(200, 200, 220, 0.35);
+            border-radius: 16px;
+            padding: 22px;
+            margin: 14px 0;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+        }
+
+        .endpoint:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(149, 128, 175, 0.14);
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .endpoint p {
+            color: #7a7290;
+            font-size: 0.92em;
+            margin: 6px 0 0;
+        }
+
+        /* Method badges */
+        .method {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 20px;
+            color: white;
+            font-weight: 600;
+            margin-right: 12px;
+            min-width: 60px;
+            text-align: center;
+            font-size: 0.82em;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .get {
+            background: linear-gradient(135deg, #81c784, #66bb6a);
+            box-shadow: 0 2px 8px rgba(102, 187, 106, 0.3);
+        }
+
+        .post {
+            background: linear-gradient(135deg, #f48fb1, #ec407a);
+            box-shadow: 0 2px 8px rgba(244, 143, 177, 0.3);
+        }
+
+        .put {
+            background: linear-gradient(135deg, #ffcc80, #ffa726);
+            color: #5d4037;
+            box-shadow: 0 2px 8px rgba(255, 167, 38, 0.3);
+        }
+
+        /* Form elements */
+        input,
+        select,
+        button,
+        textarea {
+            padding: 10px 14px;
+            margin: 6px 4px;
+            border: 1px solid rgba(200, 200, 220, 0.4);
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.25s ease;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            min-width: 200px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(4px);
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #ce93d8;
+            box-shadow: 0 0 0 3px rgba(206, 147, 216, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            resize: vertical;
+            padding: 10px 14px;
+        }
+
+        /* Buttons */
+        button {
+            background: linear-gradient(135deg, #b39ddb, #9575cd);
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(149, 117, 205, 0.25);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #9575cd, #7e57c2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(149, 117, 205, 0.35);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 6px rgba(149, 117, 205, 0.2);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #a5d6a7, #66bb6a);
+            box-shadow: 0 2px 10px rgba(102, 187, 106, 0.25);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #81c784, #4caf50);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffe082, #ffb74d);
+            color: #5d4037;
+            box-shadow: 0 2px 10px rgba(255, 183, 77, 0.25);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef9a9a, #ef5350);
+            box-shadow: 0 2px 10px rgba(239, 83, 80, 0.25);
+        }
+
+        /* Response panel */
+        .response {
+            background: rgba(45, 40, 62, 0.9);
+            backdrop-filter: blur(10px);
+            color: #e8e0f0;
+            border-radius: 16px;
+            padding: 22px;
+            margin: 16px 0;
+            white-space: pre-wrap;
+            font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid rgba(149, 117, 205, 0.3);
+            line-height: 1.5;
+        }
+
+        .status-200 {
+            border-left: 5px solid #a5d6a7;
+        }
+
+        .status-201 {
+            border-left: 5px solid #81c784;
+        }
+
+        .status-400 {
+            border-left: 5px solid #ffe082;
+        }
+
+        .status-401 {
+            border-left: 5px solid #ef9a9a;
+        }
+
+        .status-404 {
+            border-left: 5px solid #ffcc80;
+        }
+
+        .status-429 {
+            border-left: 5px solid #f48fb1;
+        }
+
+        .status-500 {
+            border-left: 5px solid #ef9a9a;
+        }
+
+        /* Custom scrollbar */
+        .response::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .response::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .response::-webkit-scrollbar-thumb {
+            background: rgba(206, 147, 216, 0.4);
+            border-radius: 4px;
+        }
+
+        .response::-webkit-scrollbar-thumb:hover {
+            background: rgba(206, 147, 216, 0.6);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 14px 0;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(4px);
+            padding: 8px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(200, 200, 220, 0.3);
+            font-size: 0.9em;
+            color: #5c5478;
+            flex-wrap: wrap;
+        }
+
+        .control-group textarea {
+            flex: 1 1 100%;
+            margin: 4px 0 0 0;
+        }
+
+        .control-group label {
+            font-weight: 500;
+            color: #6d5e7a;
+            white-space: nowrap;
+        }
+
+
+        /* Curl examples */
+        .curl-example {
+            background: rgba(45, 40, 62, 0.85);
+            color: #d4d0e0;
+            padding: 15px 18px;
+            border-radius: 12px;
+            font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .copy-btn {
+            background: rgba(206, 147, 216, 0.3);
+            color: #e8e0f0;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            cursor: pointer;
+            float: right;
+            margin-top: -40px;
+            margin-right: 10px;
+            position: relative;
+            z-index: 10;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(206, 147, 216, 0.5);
+        }
+
+        /* API info panel */
+        .api-info {
+            background: rgba(225, 245, 254, 0.45);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(129, 212, 250, 0.3);
+            border-radius: 16px;
+            padding: 18px 22px;
+            margin: 20px 0;
+        }
+
+        .api-info h4 {
+            color: #00838f;
+            margin-top: 0;
+            font-weight: 600;
+        }
+
+        /* Stats cards */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 14px;
+            margin: 18px 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(200, 200, 220, 0.3);
+            border-radius: 16px;
+            padding: 18px;
+            text-align: center;
+            transition: transform 0.25s ease;
+        }
+
+        .stat-card:nth-child(1) {
+            border-bottom: 3px solid #b39ddb;
+        }
+
+        .stat-card:nth-child(2) {
+            border-bottom: 3px solid #81c784;
+        }
+
+        .stat-card:nth-child(3) {
+            border-bottom: 3px solid #81d4fa;
+        }
+
+        .stat-card:nth-child(4) {
+            border-bottom: 3px solid #f48fb1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ab47bc, #5c6bc0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: #8e8a9e;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        /* Checkbox styling */
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #9575cd;
+            min-width: auto;
+        }
+
+        /* Visual Response Cards */
+        .response-visual {
+            min-height: 80px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+            gap: 24px;
+            max-width: 2000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            place-items: center;
+            justify-content: center;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 22px;
+            border: 1px solid rgba(200, 200, 220, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            width: 420px;
+            height: 420px;
+            position: relative;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 28px rgba(149, 128, 175, 0.2);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .result-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 10px;
+            flex-wrap: nowrap;
+        }
+
+        .result-card-header>div:first-child {
+            display: flex;
+            gap: 6px;
+            flex-wrap: nowrap;
+            align-items: center;
+        }
+
+        .result-card-title {
+            font-weight: 700;
+            font-size: 1.15em;
+            color: #2d2854;
+            margin-bottom: 12px;
+            flex-grow: 1;
+        }
+
+        .complete-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #b39ddb;
+            background: rgba(255, 255, 255, 0.8);
+            color: #b39ddb;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .complete-btn:hover {
+            border-color: #9575cd;
+            background: linear-gradient(135deg, #b39ddb, #9575cd);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(149, 117, 205, 0.3);
+        }
+
+        .complete-btn:active {
+            transform: scale(0.95);
+        }
+
+        .complete-btn.completed {
+            border-color: #81c784;
+            background: linear-gradient(135deg, #a5d6a7, #81c784);
+            color: white;
+            animation: completePopIn 0.4s ease;
+        }
+
+        .delete-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #ef9a9a;
+            background: rgba(255, 255, 255, 0.8);
+            color: #ef9a9a;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .delete-btn:hover {
+            border-color: #ef5350;
+            background: linear-gradient(135deg, #ef9a9a, #ef5350);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(239, 83, 80, 0.3);
+        }
+
+        .delete-btn:active {
+            transform: scale(0.95);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-pending {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .badge-in_progress,
+        .badge-in-progress {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge-completed {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-low {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .badge-medium {
+            background: #fff8e1;
+            color: #f57f17;
+        }
+
+        .badge-high {
+            background: #fce4ec;
+            color: #c62828;
+        }
+
+        .badge-critical {
+            background: #ffebee;
+            color: #b71c1c;
+        }
+
+        .badge-easy {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-hard {
+            background: #fce4ec;
+            color: #c62828;
+        }
+
+        .result-card-body {
+            font-size: 0.85em;
+            color: #6d5e7a;
+            line-height: 1.5;
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+
+        .result-card-body .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(200, 200, 220, 0.1);
+        }
+
+        .detail-row .label {
+            color: #8e8a9e;
+        }
+
+        .detail-row .value {
+            font-weight: 500;
+            color: #4a4458;
+        }
+
+        .xp-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #b39ddb, #9575cd);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.82em;
+            font-weight: 600;
+        }
+
+        .tag-pill {
+            display: inline-block;
+            background: rgba(206, 147, 216, 0.15);
+            color: #7b1fa2;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.78em;
+            margin: 2px;
+        }
+
+        .result-message {
+            background: rgba(129, 199, 132, 0.15);
+            border: 1px solid rgba(129, 199, 132, 0.3);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 14px;
+            color: #2e7d32;
+            font-weight: 500;
+            text-align: center;
+            font-size: 1.05em;
+        }
+
+        .result-error {
+            background: rgba(239, 154, 154, 0.15);
+            border: 1px solid rgba(239, 154, 154, 0.3);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: #c62828;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .player-header {
+            text-align: center;
+            padding: 16px 0;
+        }
+
+        .player-avatar {
+            font-size: 3em;
+            margin-bottom: 6px;
+        }
+
+        .player-name {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #4a4458;
+        }
+
+        .player-level {
+            color: #8e8a9e;
+            font-size: 0.9em;
+        }
+
+        .player-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .player-stat-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 12px 8px;
+        }
+
+        .player-stat-item .val {
+            font-size: 1.4em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ab47bc, #5c6bc0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .player-stat-item .lbl {
+            font-size: 0.78em;
+            color: #8e8a9e;
+            margin-top: 2px;
+        }
+
+        @keyframes completePopIn {
+            0% {
+                transform: scale(0.8);
+            }
+
+            50% {
+                transform: scale(1.15);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+
+        /* Leaderboard Specific Styles */
+        .leaderboard-list {
+            max-width: 900px;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(14px);
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            box-shadow: 0 10px 40px rgba(149, 128, 175, 0.08);
+        }
+
+        .leaderboard-item {
+            display: grid;
+            grid-template-columns: 80px 1fr 140px 140px 100px;
+            align-items: center;
+            padding: 16px 28px;
+            border-bottom: 1px solid rgba(200, 200, 220, 0.12);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            gap: 20px;
+            position: relative;
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-item:hover {
+            background: rgba(255, 255, 255, 0.65);
+            transform: scale(1.005);
+            z-index: 5;
+            box-shadow: 0 4px 20px rgba(149, 128, 175, 0.05);
+        }
+
+        .rank-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2em;
+            margin: 0 auto;
+            position: relative;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .rank-1 .rank-badge {
+            background: linear-gradient(135deg, #ffd700, #ffb300);
+            color: #795548;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .rank-1 .rank-badge::after {
+            content: '👑';
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            font-size: 1.2em;
+        }
+
+        .rank-2 .rank-badge {
+            background: linear-gradient(135deg, #e0e0e0, #bdbdbd);
+            color: #455a64;
+            box-shadow: 0 4px 15px rgba(224, 224, 224, 0.4);
+        }
+
+        .rank-3 .rank-badge {
+            background: linear-gradient(135deg, #cd7f32, #a1887f);
+            color: white;
+            box-shadow: 0 4px 15px rgba(205, 127, 50, 0.4);
+        }
+
+        .rank-other .rank-badge {
+            background: rgba(224, 224, 224, 0.3);
+            color: #8e8a9e;
+        }
+
+        .lb-player-cell {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .lb-avatar {
+            width: 44px;
+            height: 44px;
+            background: white;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(200, 200, 220, 0.2);
+        }
+
+        .lb-name-stack {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lb-display-name {
+            font-weight: 700;
+            color: #312b5a;
+            font-size: 1.05em;
+        }
+
+        .lb-username {
+            font-size: 0.82em;
+            color: #8e8a9e;
+            font-family: 'Cascadia Code', monospace;
+        }
+
+        .lb-stat-cell {
+            display: flex;
+            flex-direction: column;
+            text-align: right;
+        }
+
+        .lb-stat-val {
+            font-weight: 700;
+            color: #4a4458;
+            font-size: 1.15em;
+        }
+
+        .lb-stat-lbl {
+            font-size: 0.72em;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #b0aec2;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .lb-xp-pill {
+            background: linear-gradient(135deg, #ab47bc, #7e57c2);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 0.95em;
+            box-shadow: 0 4px 12px rgba(126, 87, 194, 0.3);
+            text-align: center;
+            width: fit-content;
+            margin-left: auto;
+        }
+
+        .lb-level-badge {
+            background: #e1f5fe;
+            color: #0288d1;
+            padding: 2px 10px;
+            border-radius: 8px;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 18px;
+                border-radius: 16px;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .quick-tests {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        /* Smooth page-level animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            animation: fadeInUp 0.5s ease-out both;
+        }
+
+        .container:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .container:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .container:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        .container:nth-child(5) {
+            animation-delay: 0.4s;
+        }
+
+        /* Quest Form Styles */
+        .quest-form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 14px;
+            margin: 14px 0;
+        }
+
+        .form-field {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(200, 200, 220, 0.4);
+            border-radius: 12px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-field label {
+            font-weight: 600;
+            color: #5c5478;
+            font-size: 0.95em;
+            display: block;
+        }
+
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            border: 1px solid rgba(200, 200, 220, 0.5);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.95em;
+            background: rgba(255, 255, 255, 0.8);
+            color: #4a4458;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .form-field input:focus,
+        .form-field select:focus,
+        .form-field textarea:focus {
+            outline: none;
+            border-color: #ce93d8;
+            box-shadow: 0 0 0 3px rgba(206, 147, 216, 0.15);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .form-field textarea {
+            min-height: 70px;
+            resize: vertical;
+            grid-column: 1 / -1;
+        }
+
+        .quest-form-btn {
+            grid-column: 1 / -1;
+            padding: 12px 24px;
+            font-size: 1em;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🏆 Quest Tracker API Tester</h1>
+        <p class="subtitle">Test your Quest Tracker API endpoints with this interactive interface</p>
+
+        <!-- Hidden API key (auto-included in all requests) -->
+        <input type="hidden" id="apiKey" value="demo_key_12345">
+    </div>
+
+    <div class="container">
+        <h2>🎯 Quest Endpoints</h2>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <strong>Build your own quest!</strong>
+            <p>Create a new quest with your custom details</p>
+            <div class="quest-form-grid">
+                <div class="form-field">
+                    <label>Title</label>
+                    <input type="text" id="newQuestTitle" placeholder="Quest title" value="">
+                </div>
+                <div class="form-field">
+                    <label>Description</label>
+                    <textarea id="newQuestDescription" placeholder="What is this quest about?"></textarea>
+                </div>
+                <div class="form-field">
+                    <label>Tags (comma-separated)</label>
+                    <input type="text" id="newQuestTags" placeholder="e.g: important, urgent, fun">
+                </div>
+                <div class="form-field">
+                    <label>Category</label>
+                    <select id="newQuestCategory">
+                        <option value="personal">Personal</option>
+                        <option value="work">Work</option>
+                        <option value="health">Health</option>
+                        <option value="learning">Learning</option>
+                        <option value="creative">Creative</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Priority</label>
+                    <select id="newQuestPriority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Difficulty</label>
+                    <select id="newQuestDifficulty">
+                        <option value="easy">Easy</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Estimated Time (mins)</label>
+                    <input type="number" id="newQuestTime" placeholder="30" value="30" min="5" max="480">
+                </div>
+                <div class="form-field">
+                    <label>XP Reward</label>
+                    <input type="number" id="newQuestXP" placeholder="50" value="50" min="10" max="500">
+                </div>
+                <div class="form-field">
+                    <label>Deadline (optional)</label>
+                    <input type="datetime-local" id="newQuestDeadline">
+                </div>
+
+                <button class="quest-form-btn" onclick="createQuest()">➕ Create Quest</button>
+                <button class="quest-form-btn" onclick="viewAllQuests()"
+                    style="background: linear-gradient(135deg, #81c784, #66bb6a); margin-top: 8px;">👀 View All
+                    Quests</button>
+            </div>
+        </div>
+
+
+
+
+
+
+    </div>
+
+    <div class="container">
+        <h2>👤 Player Endpoints</h2>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <strong>View Players' Profile</strong>
+            <p>Get player profile, statistics, and quest progress</p>
+            <div class="controls">
+                <div class="control-group">
+                    <label>Username:</label>
+                    <input type="text" id="playerUsername" value="alex" placeholder="Username">
+                </div>
+
+                <button onclick="testPlayer()">👤 Get Player</button>
+            </div>
+            <p><strong>Available players:</strong> alex, jordan, sam, demo</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <strong>/api/players</strong>
+            <p>Get leaderboard with player rankings</p>
+            <div class="controls">
+                <div class="control-group">
+                    <label>Sort By:</label>
+                    <select id="playerSortBy">
+                        <option value="level">Level</option>
+                        <option value="xp">Total XP</option>
+                        <option value="streak">Current Streak</option>
+                        <option value="activity">Activity Score</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Limit:</label>
+                    <input type="number" id="playerLimit" value="10" min="1" max="50">
+                </div>
+                <button onclick="testPlayersLeaderboard()">🏆 Get Leaderboard</button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="container">
+        <h2>📊 API Statistics</h2>
+        <div class="stats">
+            <div class="stat-card">
+                <div id="totalRequests" class="stat-value">0</div>
+                <div class="stat-label">Total Requests</div>
+            </div>
+            <div class="stat-card">
+                <div id="successfulRequests" class="stat-value">0</div>
+                <div class="stat-label">Successful</div>
+            </div>
+            <div class="stat-card">
+                <div id="avgResponseTime" class="stat-value">0ms</div>
+                <div class="stat-label">Avg Latency</div>
+            </div>
+            <div class="stat-card">
+                <div id="lastStatusCode" class="stat-value">-</div>
+                <div class="stat-label">Last Status</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📤 API Response</h2>
+        <div id="responseVisual" class="response-visual">
+            <div class="result-message" style="background: rgba(255,255,255,0.3); color: #8e8a9e;">
+                Responses will appear here as visual cards...
+            </div>
+        </div>
+
+        <h3 style="margin-top: 32px; color: #5c5478; font-size: 1.1em;">🛠 Raw JSON Data</h3>
+        <div id="response" class="response">No request made yet.</div>
+    </div>
+
+    <script>
+        const baseUrl = 'http://localhost:3000';
+        let requestStats = {
+            total: 0,
+            successful: 0,
+            responseTimes: [],
+            lastStatus: null
+        };
+
+        async function makeRequest(endpoint, params = {}, method = 'GET', body = null) {
+            const apiKey = document.getElementById('apiKey').value;
+            const startTime = performance.now();
+            requestStats.total++;
+
+            try {
+                let url, options;
+
+                if (method === 'GET') {
+                    params.api_key = apiKey;
+                    url = new URL(endpoint, baseUrl);
+                    Object.keys(params).forEach(key => {
+                        if (params[key] !== null && params[key] !== '') {
+                            url.searchParams.append(key, params[key]);
+                        }
+                    });
+                    options = { method: 'GET' };
+                } else {
+                    url = new URL(endpoint, baseUrl);
+                    url.searchParams.append('api_key', apiKey);
+                    options = {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-API-Key': apiKey
+                        }
+                    };
+                    if (body) {
+                        options.body = JSON.stringify(body);
+                    }
+                }
+
+                const response = await fetch(url, options);
+                const data = await response.json();
+                const responseTime = performance.now() - startTime;
+
+                requestStats.responseTimes.push(responseTime);
+                requestStats.lastStatus = response.status;
+                if (response.ok) requestStats.successful++;
+
+                displayResponse(response.status, data, url.toString(), responseTime);
+                updateRequestStats();
+
+                return { response, data };
+
+            } catch (error) {
+                const responseTime = performance.now() - startTime;
+                requestStats.responseTimes.push(responseTime);
+                requestStats.lastStatus = 0;
+
+                displayResponse(0, { error: 'Network Error', message: error.message }, endpoint, responseTime);
+                updateRequestStats();
+                throw error;
+            }
+        }
+
+        function displayResponse(status, data, url, responseTime) {
+            // 1. Update Raw JSON View (kept for debugging)
+            const responseDiv = document.getElementById('response');
+            responseDiv.className = `response status-${status}`;
+
+            const timestamp = new Date().toLocaleTimeString();
+            const statusText = status === 0 ? 'NETWORK ERROR' :
+                status < 300 ? 'SUCCESS' :
+                    status < 400 ? 'REDIRECT' :
+                        status < 500 ? 'CLIENT ERROR' : 'SERVER ERROR';
+
+            responseDiv.textContent = `[${timestamp}] ${statusText} (${Math.round(responseTime)}ms)\n` +
+                `Status: ${status}\n` +
+                `URL: ${url}\n\n` +
+                `${JSON.stringify(data, null, 2)}`;
+
+            // 2. Render Visual Cards
+            const visualDiv = document.getElementById('responseVisual');
+            visualDiv.innerHTML = '';
+
+            if (status === 0 || status >= 400) {
+                visualDiv.innerHTML = `<div class="result-error">
+                    <h3>❌ Oops! Something went wrong</h3>
+                    <p>${data.message || data.error || 'Check the raw JSON details below.'}</p>
+                </div>`;
+            } else {
+                let content = '';
+
+                // DETECT: List of Quests
+                if (data.quests && Array.isArray(data.quests)) {
+                    content = `<div class="result-message">✨ Found ${data.quests.length} quests</div><div class="result-grid">` +
+                        data.quests.map(q => renderQuestCard(q)).join('') + '</div>';
+                }
+                // DETECT: Single Quest (created or retrieved) with reward message
+                else if ((data.quest && data.message) || (data.title && data.category && data.priority)) {
+                    const quest = data.quest || data;
+                    const msg = data.message ? `<div class="result-message">✅ ${data.message}</div>` : '';
+                    const rewards = data.rewards ? `<div class="result-card" style="margin: 16px 0; background: linear-gradient(135deg, rgba(165, 214, 167, 0.3), rgba(102, 187, 106, 0.2));">
+                        <div class="result-card-title">🎁 XP Rewards</div>
+                        <div class="result-card-body">
+                            <div class="detail-row"><span class="label">Base XP</span> <span class="xp-badge">${data.rewards.base_xp} XP</span></div>
+                            <div class="detail-row"><span class="label">Bonus XP</span> <span class="xp-badge">+${data.rewards.bonus_xp} XP</span></div>
+                            <div class="detail-row"><span class="label">Difficulty Multiplier</span> <span class="value">${data.rewards.difficulty_multiplier}x</span></div>
+                            <div class="detail-row" style="border: 2px solid #81c784; padding: 8px; border-radius: 8px;"><span class="label" style="font-weight: 700;">Total Earned</span> <span class="xp-badge" style="font-size: 1.1em;">⭐ ${data.rewards.total_xp_earned} XP</span></div>
+                        </div>
+                    </div>` : '';
+                    content = msg + rewards + renderQuestCard(quest);
+                }
+                // DETECT: Player Profile
+                else if (data.username && (data.stats || data.total_xp !== undefined)) {
+                    content = renderPlayerProfile(data);
+                    if (data.active_quests && data.active_quests.length > 0) {
+                        content += `<h3 style="margin: 20px 0 10px; color: #4a4458;">Active Quests</h3><div class="result-grid">` +
+                            data.active_quests.map(q => renderQuestCard(q)).join('') + '</div>';
+                    }
+                }
+                // DETECT: Leaderboard
+                else if (data.leaderboard_stats && data.players && Array.isArray(data.players)) {
+                    const stats = data.leaderboard_stats;
+                    content = `
+                    <div class="result-card" style="max-width: 850px; margin: 0 auto 32px; background: linear-gradient(135deg, rgba(237, 231, 246, 0.4), rgba(179, 157, 219, 0.2)); border: 1px solid rgba(179, 157, 219, 0.3); box-shadow: 0 8px 32px rgba(103, 58, 183, 0.05);">
+                        <div class="result-card-title" style="display: flex; align-items: center; gap: 10px; font-size: 1.3em;">
+                            <span style="font-size: 1.4em;">🏆</span> Leaderboard Intelligence
+                        </div>
+                        <div class="player-stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 5px;">
+                            <div class="player-stat-item" style="background: rgba(255,255,255,0.4);"><div class="val">${stats.total_players}</div><div class="lbl">Adventurers</div></div>
+                            <div class="player-stat-item" style="background: rgba(255,255,255,0.4);"><div class="val">Lvl ${stats.average_level}</div><div class="lbl">Avg. Level</div></div>
+                            <div class="player-stat-item" style="background: rgba(255,255,255,0.4);"><div class="val" style="font-size: 1.1em;">✨ ${stats.total_xp_earned.toLocaleString()}</div><div class="lbl">Total XP</div></div>
+                            <div class="player-stat-item" style="background: rgba(255,255,255,0.4);"><div class="val">${stats.average_completion_rate}%</div><div class="lbl">Completion</div></div>
+                        </div>
+                    </div>`;
+                    content += `<div class="result-message">🏆 Legendary Adventurers</div>
+                    <div class="leaderboard-list">` +
+                        data.players.map((p, i) => renderPlayerCard(p, p.leaderboard_position || (i + 1))).join('') + '</div>';
+                }
+
+                // FALLBACK
+                else {
+                    content = `<div class="result-message">✅ Request Successful! Check raw JSON below.</div>`;
+                }
+
+                visualDiv.innerHTML = content;
+            }
+
+            // Auto-scroll to the visual section
+            visualDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // --- Helper Renderers ---
+
+        function renderQuestCard(q) {
+            const date = q.deadline ? new Date(q.deadline).toLocaleDateString() : 'No deadline';
+            const tagsHtml = (q.tags && Array.isArray(q.tags) && q.tags.length > 0)
+                ? q.tags.map(t => `<span class="tag-pill">#${t}</span>`).join('')
+                : '';
+            const isCompleted = q.status === 'completed';
+            return `
+            <div class="result-card">
+                <div class="result-card-header">
+                    <div>
+                        <span class="badge badge-${q.priority || 'medium'}">${q.priority || 'Medium'}</span>
+                        <span class="badge badge-${q.difficulty || 'medium'}">${q.difficulty || 'Normal'}</span>
+                        <span class="badge badge-${q.status || 'pending'}">${(q.status || 'pending').replace('_', ' ')}</span>
+                    </div>
+                    <button class="complete-btn ${isCompleted ? 'completed' : ''}" onclick="markQuestComplete(${q.id}, this)" title="Mark as complete">✓</button>
+                    <button class="delete-btn" onclick="deleteQuest(${q.id}, this)" title="Delete quest">🗑</button>
+                </div>
+                <div class="result-card-title">${q.title || 'Untitled Quest'}</div>
+                <div class="result-card-body">
+                    <p style="margin: 0 0 8px 0;">${q.description || 'No description'}</p>
+                    <div class="detail-row"><span class="label">Category</span> <span class="value">${q.category || 'N/A'}</span></div>
+                    <div class="detail-row"><span class="label">XP</span> <span class="xp-badge">✨ ${q.xp_reward || 0}</span></div>
+                    <div class="detail-row"><span class="label">Time</span> <span class="value">${q.estimated_time || 30} mins</span></div>
+                    <div class="detail-row"><span class="label">Deadline</span> <span class="value">${date}</span></div>
+                    ${tagsHtml ? `<div style="margin-top: 8px;">${tagsHtml}</div>` : ''}
+                </div>
+            </div>`;
+        }
+
+        function renderPlayerProfile(p) {
+            const stats = p.stats || {};
+            const avatars = ['🧙‍♂️', '🧝‍♀️', '💂‍♂️', '🧛‍♂️', '🧚‍♀️', '🥷', '👤', '🦁', '🦉', '🦊'];
+            const avatar = avatars[Math.abs(p.username.length) % avatars.length];
+
+            return `
+             <div class="result-card" style="max-width: 650px; margin: 0 auto; background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(243, 229, 245, 0.6)); border: 1px solid rgba(149, 117, 205, 0.2);">
+                <div class="player-header" style="border-bottom: 2px solid rgba(149, 117, 205, 0.1); padding-bottom: 24px; margin-bottom: 20px;">
+                    <div class="player-avatar" style="font-size: 4em; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));">${avatar}</div>
+                    <div class="player-name" style="font-size: 1.8em; letter-spacing: -0.5px;">${p.display_name}</div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 6px;">
+                        <span class="lb-username">@${p.username}</span>
+                        <span class="badge badge-completed" style="font-size: 0.7em; padding: 2px 10px;">Lvl ${p.level || 1} Adventurer</span>
+                    </div>
+                </div>
+                <div class="player-stats-grid">
+                    <div class="player-stat-item"><div class="val">${stats.total_quests_completed || 0}</div><div class="lbl">Completed</div></div>
+                    <div class="player-stat-item"><div class="val">${stats.completion_rate || 0}%</div><div class="lbl">Success Rate</div></div>
+                    <div class="player-stat-item"><div class="val" style="font-size: 1.25em;">✨ ${p.total_xp.toLocaleString()}</div><div class="lbl">XP Balance</div></div>
+                    <div class="player-stat-item">
+                        <div class="val" style="color: #ffb300;">🔥 ${stats.streak_status || 'Building'}</div>
+                        <div class="lbl">Current Streak</div>
+                    </div>
+                </div>
+             </div>
+             `;
+        }
+
+        function renderPlayerCard(p, rank) {
+            const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+            const avatars = ['🧙‍♂️', '🧝‍♀️', '💂‍♂️', '🧛‍♂️', '🧚‍♀️', '🥷', '👤', '🦁', '🦉', '🦊'];
+            const avatar = avatars[Math.abs(p.username.length + rank) % avatars.length];
+
+            return `
+            <div class="leaderboard-item ${rankClass}">
+                <div class="rank-badge">${rank}</div>
+                <div class="lb-player-cell">
+                    <div class="lb-avatar">${avatar}</div>
+                    <div class="lb-name-stack">
+                        <span class="lb-display-name">${p.display_name}</span>
+                        <span class="lb-username">@${p.username}</span>
+                    </div>
+                </div>
+                <div class="lb-stat-cell">
+                    <span class="lb-stat-val">Level ${p.level || 1}</span>
+                    <span class="lb-stat-lbl">Ranked Class</span>
+                </div>
+                <div class="lb-stat-cell">
+                    <span class="lb-stat-val">${p.activity_score || 0}</span>
+                    <span class="lb-stat-lbl">Activity Score</span>
+                </div>
+                <div class="lb-xp-pill">✨ ${p.total_xp.toLocaleString()}</div>
+            </div>`;
+        }
+
+
+
+        function updateRequestStats() {
+            document.getElementById('totalRequests').textContent = requestStats.total;
+            document.getElementById('successfulRequests').textContent = requestStats.successful;
+
+            const avgTime = requestStats.responseTimes.length > 0
+                ? Math.round(requestStats.responseTimes.reduce((a, b) => a + b, 0) / requestStats.responseTimes.length)
+                : 0;
+            document.getElementById('avgResponseTime').textContent = avgTime + 'ms';
+            document.getElementById('lastStatusCode').textContent = requestStats.lastStatus || '-';
+        }
+
+        // API Testing Functions
+        async function testAuthentication() {
+            await makeRequest('/api/quests/1');
+        }
+
+        async function getServerInfo() {
+            await makeRequest('/');
+        }
+
+        async function getApiDocs() {
+            await makeRequest('/api/docs');
+        }
+
+        async function getHealthCheck() {
+            await makeRequest('/health');
+        }
+
+        async function getStats() {
+            await makeRequest('/api/stats');
+        }
+
+
+
+
+
+
+
+        async function deleteQuest(questId, buttonEl) {
+            try {
+                const apiKey = document.getElementById('apiKey').value;
+
+                // Remove the card from DOM with smooth animation
+                const card = buttonEl.closest('.result-card');
+                card.style.transition = 'all 0.3s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.5) rotate(-5deg)';
+
+                // Remove after animation completes
+                setTimeout(async () => {
+                    card.remove();
+
+                    // Then make API call to delete from backend
+                    try {
+                        const response = await fetch(`http://localhost:3000/api/quests/${questId}?api_key=${apiKey}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-API-Key': apiKey
+                            }
+                        });
+
+                        if (response.ok) {
+                            console.log('🗑 Quest deleted successfully!');
+                        } else {
+                            const data = await response.json();
+                            console.error('Error deleting quest:', data?.message || 'Unknown error');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                }, 300);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function markQuestComplete(questId, buttonEl) {
+            try {
+                const apiKey = document.getElementById('apiKey').value;
+
+                // Toggle UI immediately for smooth user experience
+                buttonEl.classList.toggle('completed');
+
+                // Update the status badge immediately
+                const statusBadge = buttonEl.closest('.result-card-header').querySelector('.badge-completed, .badge-pending');
+                if (statusBadge) {
+                    if (buttonEl.classList.contains('completed')) {
+                        statusBadge.className = 'badge badge-completed';
+                        statusBadge.textContent = 'Completed';
+                    } else {
+                        statusBadge.className = 'badge badge-pending';
+                        statusBadge.textContent = 'Pending';
+                    }
+                }
+
+                // Make API call in background
+                const response = await fetch(`http://localhost:3000/api/quests/${questId}/complete?api_key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': apiKey
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    console.error('Error updating quest:', data?.message || 'Unknown error');
+                } else {
+                    // Show XP earned if quest was completed
+                    if (buttonEl.classList.contains('completed') && data.rewards) {
+                        const totalXp = data.rewards.total_xp || data.rewards.base_xp || 0;
+                        const xpBadgeEl = buttonEl.closest('.result-card').querySelector('.xp-badge');
+                        if (xpBadgeEl) {
+                            const originalText = xpBadgeEl.textContent;
+                            xpBadgeEl.innerHTML = `<strong>✨ +${totalXp} XP 🎉</strong>`;
+                            setTimeout(() => {
+                                xpBadgeEl.textContent = originalText;
+                            }, 2000);
+                        }
+                        alert(`🎉 Quest Completed! You earned ${totalXp} XP!`);
+                    }
+                    console.log(`✅ Quest status toggled!`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function viewAllQuests() {
+            try {
+                const apiKey = document.getElementById('apiKey').value;
+                const response = await fetch(`http://localhost:3000/api/quests?api_key=${apiKey}&limit=50`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': apiKey
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.quests) {
+                    // Create visual grid of all quests
+                    const visualDiv = document.getElementById('responseVisual');
+                    const questCards = data.quests.map(q => renderQuestCard(q)).join('');
+                    visualDiv.innerHTML = `<div class="result-message" style="background: rgba(165, 214, 167, 0.2); border: 1px solid rgba(129, 199, 132, 0.3);">📋 Showing ${data.quests.length} Quests</div><div class="result-grid">${questCards}</div>`;
+                    visualDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    console.log(`📋 Loaded ${data.quests.length} quests!`);
+                } else {
+                    console.error('Error loading quests:', data?.message || 'Unknown error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function createQuest() {
+            const title = document.getElementById('newQuestTitle').value.trim();
+            const description = document.getElementById('newQuestDescription').value.trim();
+            const category = document.getElementById('newQuestCategory').value;
+            const priority = document.getElementById('newQuestPriority').value;
+            const difficulty = document.getElementById('newQuestDifficulty').value;
+            const estimatedTime = parseInt(document.getElementById('newQuestTime').value) || 30;
+            const xpReward = parseInt(document.getElementById('newQuestXP').value) || 50;
+            const deadline = document.getElementById('newQuestDeadline').value;
+            const tagsInput = document.getElementById('newQuestTags').value.trim();
+            const tags = tagsInput.split(',').map(t => t.trim()).filter(t => t.length > 0);
+
+            // Validate required fields
+            if (!title) {
+                alert('❌ Quest title is required!');
+                return;
+            }
+
+            if (!category || !priority) {
+                alert('❌ Category and Priority are required!');
+                return;
+            }
+
+            const questData = {
+                title: title,
+                description: description || `A quest: ${title}`,
+                category: category,
+                priority: priority,
+                difficulty: difficulty,
+                estimated_time: estimatedTime,
+                xp_reward: xpReward,
+                tags: tags.length > 0 ? tags : [category]
+            };
+
+            // Add deadline if provided
+            if (deadline) {
+                questData.deadline = new Date(deadline).toISOString();
+            }
+
+            await makeRequest('/api/quests', {}, 'POST', questData);
+        }
+
+        async function testPlayer() {
+            const username = document.getElementById('playerUsername').value;
+
+            await makeRequest(`/api/players/${username}`, {
+                include_quests: 'true',
+                include_stats: 'true'
+            });
+        }
+
+        async function testPlayersLeaderboard() {
+            const sortBy = document.getElementById('playerSortBy').value;
+            const limit = document.getElementById('playerLimit').value;
+
+            await makeRequest('/api/players', {
+                sort_by: sortBy,
+                order: 'desc',
+                limit: limit
+            });
+        }
+
+
+
+        // Initialize
+        window.onload = () => {
+            // Initialize stats and load quests
+            updateRequestStats();
+            // Auto-load all quests on page load
+            viewAllQuests();
+        };
+    </script>
+</body>
+
+</html>
